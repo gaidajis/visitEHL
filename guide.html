@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHL Business Guest Dashboard | Geneva → Lausanne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sbb-red: #EB0000;
+            --sbb-dark: #2D327D;
+            --lake-blue: #0066B3;
+            --vine-green: #4A7C59;
+            --gold: #C5A059;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%); color: var(--dark); line-height: 1.6; }
+
+        /* Header */
+        .hero {
+            background: linear-gradient(135deg, var(--sbb-dark) 0%, var(--lake-blue) 100%);
+            color: white;
+            padding: 2rem 1rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -10%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-content { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .hero p { font-size: 1.1rem; opacity: 0.9; max-width: 600px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; margin-top: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Navigation */
+        .nav-container {
+            max-width: 1200px; margin: -2rem auto 2rem; padding: 0 1rem;
+            position: relative; z-index: 10;
+        }
+        .nav-tabs {
+            display: flex; gap: 0.5rem; overflow-x: auto;
+            background: white; padding: 0.75rem; border-radius: var(--radius);
+            box-shadow: var(--shadow); scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tab {
+            flex: 1; min-width: 120px; padding: 0.875rem 1rem;
+            border: none; background: transparent; border-radius: 12px;
+            font-family: inherit; font-weight: 600; font-size: 0.9rem;
+            color: #64748b; cursor: pointer; transition: all 0.3s;
+            white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .nav-tab:hover { background: #f1f5f9; color: var(--dark); }
+        .nav-tab.active { background: var(--sbb-red); color: white; box-shadow: 0 4px 12px rgba(235,0,0,0.3); }
+
+        /* Main Content */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem 3rem; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .grid { display: grid; gap: 1.5rem; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius);
+            box-shadow: var(--shadow); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        .card-img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .card-body { padding: 1.5rem; }
+        .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--dark); }
+        .card-text { color: #64748b; font-size: 0.95rem; line-height: 1.6; }
+        .card-meta {
+            display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem;
+            border-top: 1px solid #f1f5f9; font-size: 0.85rem; color: #94a3b8;
+        }
+        .card-meta i { color: var(--sbb-red); }
+
+        /* Feature Cards */
+        .feature-card {
+            background: linear-gradient(135deg, white 0%, #fafbfc 100%);
+            border-left: 4px solid var(--sbb-red); padding: 1.5rem;
+            border-radius: var(--radius); box-shadow: var(--shadow);
+        }
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--sbb-red), #ff4444);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; margin-bottom: 1rem;
+        }
+
+        /* Itinerary Timeline */
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: linear-gradient(to bottom, var(--sbb-red), var(--lake-blue));
+            border-radius: 3px;
+        }
+        .timeline-item { position: relative; margin-bottom: 2rem; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -2.4rem; top: 0.25rem;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: white; border: 3px solid var(--sbb-red);
+            box-shadow: 0 0 0 4px rgba(235,0,0,0.1);
+        }
+        .time-badge {
+            display: inline-block; background: var(--sbb-dark); color: white;
+            padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.8rem;
+            font-weight: 600; margin-bottom: 0.5rem;
+        }
+        .timeline-content {
+            background: white; padding: 1.25rem; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        /* Day Header */
+        .day-header {
+            background: linear-gradient(135deg, var(--dark) 0%, #2d3748 100%);
+            color: white; padding: 1.5rem; border-radius: var(--radius);
+            margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .day-header h2 { font-size: 1.5rem; font-weight: 700; }
+        .day-tag {
+            background: rgba(255,255,255,0.15); padding: 0.5rem 1rem;
+            border-radius: 50px; font-size: 0.85rem; backdrop-filter: blur(10px);
+        }
+
+        /* Transport Table */
+        .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow); }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: var(--sbb-dark); color: white; padding: 1rem; text-align: left; font-weight: 600; }
+        td { padding: 1rem; border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background: #fafbfc; }
+
+        /* App Store Buttons */
+        .app-btn {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            background: var(--dark); color: white; padding: 0.75rem 1.25rem;
+            border-radius: 10px; text-decoration: none; font-weight: 600;
+            transition: all 0.3s; border: none; cursor: pointer;
+        }
+        .app-btn:hover { background: var(--sbb-red); transform: translateY(-2px); }
+
+        /* Image Gallery */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; }
+        .gallery img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.3s; }
+        .gallery img:hover { transform: scale(1.05); }
+
+        /* Tags */
+        .tag {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: #f1f5f9; color: #475569; padding: 0.35rem 0.75rem;
+            border-radius: 6px; font-size: 0.8rem; font-weight: 500; margin: 0.25rem;
+        }
+        .tag.red { background: rgba(235,0,0,0.08); color: var(--sbb-red); }
+        .tag.blue { background: rgba(0,102,179,0.08); color: var(--lake-blue); }
+        .tag.green { background: rgba(74,124,89,0.08); color: var(--vine-green); }
+        .tag.gold { background: rgba(197,160,89,0.1); color: var(--gold); }
+
+        /* Alert Box */
+        .alert {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 4px solid var(--gold); padding: 1.25rem;
+            border-radius: 12px; margin-bottom: 1.5rem; display: flex; gap: 1rem;
+            align-items: flex-start;
+        }
+        .alert-icon { font-size: 1.25rem; color: var(--gold); flex-shrink: 0; }
+        .alert strong { color: #856404; display: block; margin-bottom: 0.25rem; }
+        .alert p { color: #856404; font-size: 0.9rem; margin: 0; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.75rem; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .timeline { padding-left: 1.5rem; }
+            .timeline-item::before { left: -1.9rem; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Modal */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal.active { display: flex; }
+        .modal img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem; color: white;
+            font-size: 2rem; cursor: pointer; background: none; border: none;
+        }
+
+        /* Status indicators */
+        .status { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; font-weight: 600; }
+        .status.open { color: var(--vine-green); }
+        .status.closed { color: var(--sbb-red); }
+        .status::before {
+            content: ''; width: 8px; height: 8px; border-radius: 50%;
+        }
+        .status.open::before { background: var(--vine-green); }
+        .status.closed::before { background: var(--sbb-red); }
+    </style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="hero-content">
+        <h1><i class="fas fa-plane-arrival"></i> EHL Business Guest Dashboard</h1>
+        <p>Your complete survival guide from Geneva Airport to École Hôtelière de Lausanne — transport, dining, itineraries & local secrets.</p>
+        <div class="hero-badge">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Sunday Arrival → Thursday Departure</span>
+        </div>
+    </div>
+</header>
+
+<!-- Navigation -->
+<div class="nav-container">
+    <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('overview')">
+            <i class="fas fa-compass"></i> Overview
+        </button>
+        <button class="nav-tab" onclick="showTab('transport')">
+            <i class="fas fa-train"></i> Transport
+        </button>
+        <button class="nav-tab" onclick="showTab('itinerary')">
+            <i class="fas fa-route"></i> Itinerary
+        </button>
+        <button class="nav-tab" onclick="showTab('dining')">
+            <i class="fas fa-utensils"></i> Dining
+        </button>
+        <button class="nav-tab" onclick="showTab('activities')">
+            <i class="fas fa-camera"></i> Activities
+        </button>
+        <button class="nav-tab" onclick="showTab('ehl')">
+            <i class="fas fa-graduation-cap"></i> EHL Amenities
+        </button>
+    </nav>
+</div>
+
+<div class="container">
+
+    <!-- OVERVIEW TAB -->
+    <div id="overview" class="tab-content active">
+        <div class="alert">
+            <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
+            <div>
+                <strong>Quick Heads-Up</strong>
+                <p>EHL campus restaurants (Berceau des Sens & 1893) serve Mon–Fri only. Sunday evening requires heading into Lausanne. Smood delivery is closed — use UberEats or Just Eat instead.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-3" style="margin-bottom: 1.5rem;">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-wifi"></i></div>
+                <h3>SBB Mobile</h3>
+                <p class="card-text">One app for 29,000+ km of Swiss transport. Buy tickets, track trains, book CGN boats, and use EasyRide for seamless metro/bus tap-in.</p>
+                <div style="margin-top: 1rem;">
+                    <span class="tag red"><i class="fas fa-mobile-alt"></i> iOS & Android</span>
+                    <span class="tag blue"><i class="fas fa-ticket-alt"></i> SwissPass</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-subway"></i></div>
+                <h3>Metro M2 + Bus</h3>
+                <p class="card-text">Automated metro climbs from Lausanne Gare to Croisettes (Epalinges). Connect with Bus 64, 45 or PostBus to EHL North/South Gates.</p>
+                <div style="margin-top: 1rem;">
+                    <span class="tag green"><i class="fas fa-clock"></i> Every 5-9 min</span>
+                    <span class="tag gold"><i class="fas fa-moon"></i> Late service</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-ship"></i></div>
+                <h3>CGN Lake Boats</h3>
+                <p class="card-text">Belle Époque steamers and modern cruisers from Ouchy to Vevey, Montreux & Chillon. Swiss Travel Pass accepted. The most scenic commute in Europe.</p>
+                <div style="margin-top: 1rem;">
+                    <span class="tag blue"><i class="fas fa-water"></i> Lake Geneva</span>
+                    <span class="tag green"><i class="fas fa-leaf"></i> UNESCO Route</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-images" style="color: var(--sbb-red);"></i> Visual Preview</h2>
+        <div class="gallery" id="gallery">
+            <img src="https://kimi-web-img.moonshot.cn/img/www.ehl.edu/d76a390a757b3b35bbe2f58139a9b431bdf2b09a.jpg" alt="EHL Campus" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/whc.unesco.org/807cde55635fa615799c5cb03fce219ec24384f5.jpg" alt="Lavaux Vineyards" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/static.lausanne-tourisme.ch/5aa6658b397325616cb86f1957cbb7088a15d7c6" alt="CGN Boat" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/www.lausanne-tourisme.ch/b9d4b0aa8a3a869cbc38c318c6d85bec28b4f009.jpg" alt="Pully Beach" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/www.twosmallpotatoes.com/7ca7704a2c622185ab2c63de4705f7940e14594f.jpg" alt="Ouchy Promenade" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/c8.alamy.com/3b20c9ab0174c7a5a46c93123e7ac6c8ba457bdf.jpg" alt="Flon District" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/hospitalityinsights.ehl.edu/e264dfba483a0f92d55c2f393c8d916fc68c9356.jpg" alt="Berceau des Sens" onclick="openModal(this.src)">
+            <img src="https://kimi-web-img.moonshot.cn/img/media-cdn.tripadvisor.com/b59e2f92242f3c8815e3b3ae83d13c9b0e787a55.jpg" alt="Brasserie Montbenon" onclick="openModal(this.src)">
+        </div>
+    </div>
+
+    <!-- TRANSPORT TAB -->
+    <div id="transport" class="tab-content">
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/res.klook.com/a19c3e6ed1db317722b7ce524949fe8cbecd68b0.jpg" class="card-img" alt="Geneva Airport Train">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-plane-arrival" style="color: var(--sbb-red);"></i> Geneva Airport → Lausanne Gare</h3>
+                    <p class="card-text">Direct Intercity trains from <strong>Genève-Aéroport</strong> station integrated into the airport. No shuttle needed — follow signs for "Gare CFF / SBB" after baggage claim.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-clock"></i> 49–53 min</span>
+                        <span><i class="fas fa-euro-sign"></i> CHF 21–65</span>
+                        <span><i class="fas fa-calendar-check"></i> 77/day</span>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag">First: 00:19</span>
+                        <span class="tag">Last: 23:28</span>
+                        <span class="tag blue">Free WiFi</span>
+                        <span class="tag green">Power outlets</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.urbanrail.net/3e05e084c5fbdb59e1d6011b3182cbd307c5ba7a.jpg" class="card-img" alt="Lausanne Metro M2">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-subway" style="color: var(--sbb-red);"></i> Metro M2 → Epalinges → EHL</h3>
+                    <p class="card-text">Fully automated metro climbs from <strong>Lausanne Gare</strong> to <strong>Croisettes</strong> (Epalinges). Then connect with bus to campus gates.</p>
+                    <div class="table-wrap" style="margin-top: 1rem;">
+                        <table>
+                            <thead>
+                                <tr><th>Gate</th><th>Bus</th><th>Stop</th><th>Freq</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>South</strong></td><td>64 / PostBus 435</td><td>Vert-bois / EHL</td><td>Every 9 min</td></tr>
+                                <tr><td><strong>North</strong></td><td>45</td><td>Cojonnex / EHL</td><td>Every 15 min</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag gold">Lausanne Transport Card</span>
+                        <span class="tag">Free with stay</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-mobile-alt" style="color: var(--sbb-red);"></i> SBB Mobile App — Your Swiss Transport Universe</h2>
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.sbb.ch/f70a5952abeca6b4b69b8fa7593b804473c41cf4.jpeg" class="card-img" alt="SBB App">
+                <div class="card-body">
+                    <h3 class="card-title">Core Features</h3>
+                    <ul style="list-style: none; padding: 0; color: #64748b;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;"><i class="fas fa-check-circle" style="color: var(--vine-green); margin-right: 0.5rem;"></i> Door-to-door routing (train + metro + bus)</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;"><i class="fas fa-check-circle" style="color: var(--vine-green); margin-right: 0.5rem;"></i> SwissPass Mobile — digital tickets & cards</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;"><i class="fas fa-check-circle" style="color: var(--vine-green); margin-right: 0.5rem;"></i> EasyRide — tap-in/tap-out auto fares</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;"><i class="fas fa-check-circle" style="color: var(--vine-green); margin-right: 0.5rem;"></i> Supersaver tickets (up to 70% off)</li>
+                        <li style="padding: 0.5rem 0;"><i class="fas fa-check-circle" style="color: var(--vine-green); margin-right: 0.5rem;"></i> CGN boat tickets integrated</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Coverage Network</h3>
+                    <p class="card-text">SBB isn't just trains — it's the backbone of <strong>29,000+ km</strong> of integrated public transport:</p>
+                    <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <span class="tag red"><i class="fas fa-train"></i> Trains</span>
+                        <span class="tag blue"><i class="fas fa-bus"></i> Buses</span>
+                        <span class="tag green"><i class="fas fa-tram"></i> Trams</span>
+                        <span class="tag gold"><i class="fas fa-ship"></i> Boats</span>
+                        <span class="tag"><i class="fas fa-mountain"></i> Mountain railways</span>
+                    </div>
+                    <div class="alert" style="margin-top: 1.5rem;">
+                        <div class="alert-icon"><i class="fas fa-lightbulb"></i></div>
+                        <div>
+                            <strong>Pro Tip</strong>
+                            <p>From Geneva Airport, SBB routes you seamlessly to Lausanne, then connects to TL metro and bus for the final mile to EHL — all in one app.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="https://www.sbb.ch/en/timetable/mobile-apps/sbb-mobile.html" target="_blank" class="app-btn">
+                <i class="fab fa-apple"></i> Download SBB Mobile
+            </a>
+            <a href="https://www.ubereats.com/ch" target="_blank" class="app-btn" style="margin-left: 1rem; background: black;">
+                <i class="fas fa-utensils"></i> UberEats
+            </a>
+            <a href="https://www.just-eat.ch" target="_blank" class="app-btn" style="margin-left: 1rem; background: #f36f36;">
+                <i class="fas fa-pizza-slice"></i> Just Eat
+            </a>
+        </div>
+    </div>
+
+    <!-- ITINERARY TAB -->
+    <div id="itinerary" class="tab-content">
+
+        <!-- Sunday -->
+        <div class="day-header">
+            <div>
+                <h2><i class="fas fa-sun" style="color: var(--gold);"></i> Sunday — Arrival & Late Dining</h2>
+                <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 0.25rem;">EHL kitchens closed Sunday evening. Head to Lausanne for food.</p>
+            </div>
+            <span class="day-tag"><i class="fas fa-utensils"></i> Late Dining Focus</span>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="time-badge">18:00</span>
+                <div class="timeline-content">
+                    <strong>Arrive EHL Campus</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Check in, settle into accommodation, connect to campus WiFi.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">19:30</span>
+                <div class="timeline-content">
+                    <strong>Metro M2 to Lausanne Center</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Take M2 from Croisettes down to Flon or Grancy station (10 min).</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">20:00</span>
+                <div class="timeline-content">
+                    <strong>Late Dinner Options</strong>
+                    <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <span class="tag red"><i class="fas fa-pizza-slice"></i> Forbici — Scissor-cut pizza until 23:00</span>
+                        <span class="tag"><i class="fas fa-pepper-hot"></i> Man'ouchy — Lebanese until 22:00</span>
+                        <span class="tag blue"><i class="fas fa-beer"></i> Brasserie du Château — Pizza until midnight</span>
+                        <span class="tag green"><i class="fas fa-utensils"></i> Café de Grancy — Brasserie until midnight</span>
+                        <span class="tag gold"><i class="fas fa-pizza-slice"></i> Domani Pizza — Neapolitan until 21:30</span>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">22:30</span>
+                <div class="timeline-content">
+                    <strong>Nightcap at Flon</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Walk through illuminated Flon district. Try <strong>N20</strong> for cocktails or explore the warehouse-converted bars.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monday -->
+        <div class="day-header" style="margin-top: 2rem;">
+            <div>
+                <h2><i class="fas fa-landmark" style="color: var(--lake-blue);"></i> Monday — Old Town, Cathedral & Ouchy</h2>
+            </div>
+            <span class="day-tag"><i class="fas fa-walking"></i> Culture & Lakefront</span>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="time-badge">17:30</span>
+                <div class="timeline-content">
+                    <strong>Metro M2 to Ouchy-Olympique</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Descend from Croisettes to the lakefront in 10 minutes.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">18:00</span>
+                <div class="timeline-content">
+                    <strong>Ouchy Promenade Walk</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Olympic Museum gardens, Belle Époque architecture, lake views, and the iconic Olympic flame monument.</p>
+                    <img src="https://kimi-web-img.moonshot.cn/img/www.twosmallpotatoes.com/7ca7704a2c622185ab2c63de4705f7940e14594f.jpg" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem;" alt="Ouchy">
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">19:30</span>
+                <div class="timeline-content">
+                    <strong>Aperitif with a View</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;"><strong>Sky Lounge (Royal Savoy)</strong> for rooftop cocktails or <strong>Les Arches</strong> under the Grand Pont for people-watching.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">20:30</span>
+                <div class="timeline-content">
+                    <strong>Dinner in Flon</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;"><strong>Tartares & Co</strong> (raw bar) or <strong>Tokyo</strong> (Japanese) in the warehouse district.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">22:00</span>
+                <div class="timeline-content">
+                    <strong>Flon Nightlife</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;"><strong>MAD Club</strong> (massive warehouse venue), <strong>D! Club</strong> (theatre-turned-DJ-space), or <strong>Le Bourg</strong> for live music.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tuesday -->
+        <div class="day-header" style="margin-top: 2rem;">
+            <div>
+                <h2><i class="fas fa-wine-glass-alt" style="color: var(--vine-green);"></i> Tuesday — Lavaux Vineyards & Le Deck</h2>
+            </div>
+            <span class="day-tag"><i class="fas fa-mountain"></i> UNESCO Terraces</span>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="time-badge">16:00</span>
+                <div class="timeline-content">
+                    <strong>Train to Lavaux</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">SBB from Lausanne to <strong>Cully</strong> (12 min) or <strong>Grandvaux</strong>. Both drop you in the heart of the vineyards.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">16:30</span>
+                <div class="timeline-content">
+                    <strong>UNESCO Vineyard Terraces Walk</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Hike the stone-walled terraces cascading to Lake Geneva with Alpine backdrop. Free and breathtaking.</p>
+                    <img src="https://kimi-web-img.moonshot.cn/img/www.enobytes.com/ed0ca40d16c1f60f79e48438363111876d899dd5.jpg" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem;" alt="Lavaux">
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">17:30</span>
+                <div class="timeline-content">
+                    <strong>Wine Tasting</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;"><strong>Auberge de la Gare</strong> (Grandvaux) or <strong>Auberge du Raisin</strong> (Cully) for local Chasselas and Pinot Noir.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">19:00</span>
+                <div class="timeline-content">
+                    <strong>Dinner at Le Deck (Baron Tavernier, Chexbres)</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">The legendary panoramic glass terrace above Lavaux. French-Mediterranean by Chef Lionel Rodriguez. <strong>Book ahead.</strong></p>
+                    <span class="tag gold"><i class="fas fa-star"></i> Most photographed view on Lake Geneva</span>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">21:00</span>
+                <div class="timeline-content">
+                    <strong>Return to Lausanne</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Last trains run until ~23:00. SBB app shows real-time connections.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wednesday -->
+        <div class="day-header" style="margin-top: 2rem;">
+            <div>
+                <h2><i class="fas fa-ship" style="color: var(--lake-blue);"></i> Wednesday — CGN Boat & Pully Beach</h2>
+            </div>
+            <span class="day-tag"><i class="fas fa-water"></i> Lake Day</span>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="time-badge">14:00</span>
+                <div class="timeline-content">
+                    <strong>Board CGN at Ouchy</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Belle Époque steamer or modern vessel from Lausanne-Ouchy pier.</p>
+                    <img src="https://kimi-web-img.moonshot.cn/img/static.lausanne-tourisme.ch/5aa6658b397325616cb86f1957cbb7088a15d7c6" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem;" alt="CGN Boat">
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">14:15</span>
+                <div class="timeline-content">
+                    <strong>Lavaux Lake Cruise</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">2-hour round trip to Vevey & back, or one-way to Montreux/Chillon Castle. CHF 38 2nd class. Swiss Travel Pass accepted.</p>
+                    <span class="tag blue"><i class="fas fa-route"></i> Eastbound = most scenic (mountains + vineyards)</span>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">17:00</span>
+                <div class="timeline-content">
+                    <strong>Return or Continue</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Return to Ouchy by boat, or take train back from Vevey/Montreux (15–20 min).</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">18:00</span>
+                <div class="timeline-content">
+                    <strong>Pully Beach</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Urban beach 10 min east of Ouchy. Swimming pools, lake access, beach volleyball, and alpine views.</p>
+                    <img src="https://kimi-web-img.moonshot.cn/img/media.timeout.com/37c6a6df36994ae12cd231fdef7f3ac6871c4554.jpg" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem;" alt="Pully Beach">
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">20:00</span>
+                <div class="timeline-content">
+                    <strong>Dinner at Le Chalet Suisse</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Traditional Swiss cuisine (fondue, rösti) on a terrace overlooking Lausanne, the lake, and the Alps. Accessible by bus from center.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thursday -->
+        <div class="day-header" style="margin-top: 2rem;">
+            <div>
+                <h2><i class="fas fa-glass-cheers" style="color: var(--sbb-red);"></i> Thursday — Montbenon & Farewell</h2>
+            </div>
+            <span class="day-tag"><i class="fas fa-heart"></i> Final Evening</span>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="time-badge">17:30</span>
+                <div class="timeline-content">
+                    <strong>Montbenon Park</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Metro/bus to Montbenon. Grand park above Flon with casino architecture, fountains, and lake glimpses.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">19:00</span>
+                <div class="timeline-content">
+                    <strong>Brasserie de Montbenon</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">High ceilings, local bistro cuisine, and a terrace with pergola overlooking the park. Open daily until midnight; continuous service weekends.</p>
+                    <img src="https://kimi-web-img.moonshot.cn/img/media-cdn.tripadvisor.com/b59e2f92242f3c8815e3b3ae83d13c9b0e787a55.jpg" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem;" alt="Brasserie Montbenon">
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">21:00</span>
+                <div class="timeline-content">
+                    <strong>Final Flon Stroll</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">Souvenirs, dessert at <strong>Friends Café</strong>, or final drinks in the warehouse district.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="time-badge">22:30</span>
+                <div class="timeline-content">
+                    <strong>Return to EHL</strong>
+                    <p style="color: #64748b; font-size: 0.9rem;">M2 to Croisettes + bus to campus gates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DINING TAB -->
+    <div id="dining" class="tab-content">
+        <div class="alert">
+            <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <strong>Delivery Update</strong>
+                <p>Smood is closed. Use <strong>UberEats</strong> or <strong>Just Eat</strong> for delivery to EHL/Epalinges (25–45 min delivery time). Both accept credit cards with real-time tracking.</p>
+            </div>
+        </div>
+
+        <h2 style="margin: 1.5rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-utensils" style="color: var(--sbb-red);"></i> Restaurants with Lake & Mountain Views</h2>
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.enobytes.com/ed0ca40d16c1f60f79e48438363111876d899dd5.jpg" class="card-img" alt="Le Deck">
+                <div class="card-body">
+                    <h3 class="card-title">Le Deck <span style="font-size: 0.8rem; color: var(--gold);"><i class="fas fa-star"></i> Panoramic Legend</span></h3>
+                    <p class="card-text">Baron Tavernier, Chexbres. The 180° glass terrace above Lavaux vineyards. French-Mediterranean by Chef Lionel Rodriguez. Book ahead for sunset.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Chexbres</span>
+                        <span><i class="fas fa-eye"></i> Lake & Alps</span>
+                        <span class="status open"><i class="fas fa-circle"></i> Open Daily</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/media-cdn.tripadvisor.com/b59e2f92242f3c8815e3b3ae83d13c9b0e787a55.jpg" class="card-img" alt="Brasserie Montbenon">
+                <div class="card-body">
+                    <h3 class="card-title">Brasserie de Montbenon</h3>
+                    <p class="card-text">Grand park setting with high ceilings and a pergola terrace. Local bistro cuisine, relaxed elegance. Open daily 09:00–midnight with continuous weekend service.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Montbenon, Lausanne</span>
+                        <span><i class="fas fa-tree"></i> Park View</span>
+                        <span class="status open"><i class="fas fa-circle"></i> Open Daily</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/8645603bd598eba44d04e48cb9665d27084368d0.jpg" class="card-img" alt="Le Chalet Suisse">
+                <div class="card-body">
+                    <h3 class="card-title">Le Chalet Suisse</h3>
+                    <p class="card-text">Traditional Swiss fare (fondue, rösti) on a wooded terrace overlooking Lausanne, Lake Geneva, and the Alps. Accessible by bus from the center.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Above Lausanne</span>
+                        <span><i class="fas fa-mountain"></i> Alpine View</span>
+                        <span class="status open"><i class="fas fa-circle"></i> Open</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/axwwgrkdco.cloudimg.io/4676aee1f97bbbcc2919f6ccf7e78a7191fa0971.jpeg" class="card-img" alt="La Table du Lausanne Palace">
+                <div class="card-body">
+                    <h3 class="card-title">L'Accademia / Hotel Angleterre</h3>
+                    <p class="card-text">Sophisticated Italian on the terrace of the historic Angleterre, directly overlooking Lake Geneva. Romantic evening setting with waterfront views.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Ouchy Waterfront</span>
+                        <span><i class="fas fa-water"></i> Lake Terrace</span>
+                        <span class="status open"><i class="fas fa-circle"></i> Open</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-pizza-slice" style="color: var(--sbb-red);"></i> Flon District — Casual & Late Dining</h2>
+        <div class="grid grid-3">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/quandestcequonmange.ch/330c3778b19f40e6ac7a683258421abe23548e5b.jpg" class="card-img" alt="Forbici">
+                <div class="card-body">
+                    <h3 class="card-title">Forbici</h3>
+                    <p class="card-text">Scissor-cut Neapolitan pizza in a designer warehouse setting. Open late until 22:00–23:00. Place de l'Europe 9, Flon.</p>
+                    <span class="tag red"><i class="fas fa-clock"></i> Late Night</span>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/0a6b39a96137cf897097bd267100a0d18e1a5d76.jpg" class="card-img" alt="Domani">
+                <div class="card-body">
+                    <h3 class="card-title">Domani Pizza</h3>
+                    <p class="card-text">Authentic Neapolitan pizza with sustainable sourcing. Cozy atmosphere. Rue du Petit-Chêne 9. Open until 21:30.</p>
+                    <span class="tag green"><i class="fas fa-leaf"></i> Sustainable</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Man'ouchy</h3>
+                    <p class="card-text">Lebanese mezzes and wraps. Fresh, flavorful, and open until 22:00. Rue César-Roux 9.</p>
+                    <span class="tag gold"><i class="fas fa-pepper-hot"></i> Lebanese</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-graduation-cap" style="color: var(--sbb-red);"></i> EHL Campus Dining (Mon–Fri)</h2>
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/hospitalityinsights.ehl.edu/e264dfba483a0f92d55c2f393c8d916fc68c9356.jpg" class="card-img" alt="Berceau des Sens">
+                <div class="card-body">
+                    <h3 class="card-title">Berceau des Sens <span style="font-size: 0.8rem; color: var(--gold);"><i class="fas fa-award"></i> Michelin Star</span></h3>
+                    <p class="card-text">Fine dining restaurant operated by EHL students under Chef Christophe Schmitt. Lunch & dinner Mon–Fri. Cocktail bar 18:00–23:00.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-award"></i> Michelin *</span>
+                        <span><i class="fas fa-calendar"></i> Mon–Fri</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/b264c8635c26462d861f7687747c06495d64b5b3.jpg" class="card-img" alt="1893">
+                <div class="card-body">
+                    <h3 class="card-title">1893</h3>
+                    <p class="card-text">French brasserie with modern local cuisine by Chef Michel de Matteis. Open lunch & dinner Mon–Fri. Contemporary EHL setting.</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-utensils"></i> Brasserie</span>
+                        <span><i class="fas fa-calendar"></i> Mon–Fri</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIVITIES TAB -->
+    <div id="activities" class="tab-content">
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/whc.unesco.org/807cde55635fa615799c5cb03fce219ec24384f5.jpg" class="card-img" alt="Lavaux">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-wine-bottle" style="color: var(--vine-green);"></i> Lavaux Vineyard Terraces</h3>
+                    <p class="card-text">800-year-old UNESCO World Heritage stone terraces cascading from Lausanne to Montreux. Walk the vineyard paths between Cully, Grandvaux, and Chexbres. Free access, breathtaking Alpine backdrop.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag green"><i class="fas fa-hiking"></i> Hiking</span>
+                        <span class="tag gold"><i class="fas fa-wine-glass"></i> Wine Tasting</span>
+                        <span class="tag blue"><i class="fas fa-camera"></i> Photography</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/static.lausanne-tourisme.ch/5aa6658b397325616cb86f1957cbb7088a15d7c6" class="card-img" alt="CGN">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-ship" style="color: var(--lake-blue);"></i> CGN Lake Cruises</h3>
+                    <p class="card-text">Belle Époque steamers and modern vessels from Ouchy. Eastern route to Vevey/Montreux passes Chillon Castle and the "Swiss Riviera." Western route to Geneva via Yvoire (France). Swiss Travel Pass accepted.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag blue"><i class="fas fa-route"></i> East: Vevey → Montreux</span>
+                        <span class="tag"><i class="fas fa-route"></i> West: Geneva → Yvoire</span>
+                        <span class="tag red"><i class="fas fa-ticket-alt"></i> CHF 38 2nd class</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/media.timeout.com/37c6a6df36994ae12cd231fdef7f3ac6871c4554.jpg" class="card-img" alt="Pully Beach">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-sun" style="color: var(--gold);"></i> Pully Beach</h3>
+                    <p class="card-text">Urban beach and swimming complex 10 minutes east of Ouchy. Features Olympic-size pools, direct lake access, beach volleyball, and a lawn with alpine views. Perfect for a Wednesday afternoon dip.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag blue"><i class="fas fa-swimmer"></i> Swimming</span>
+                        <span class="tag green"><i class="fas fa-volleyball-ball"></i> Beach Volleyball</span>
+                        <span class="tag"><i class="fas fa-bus"></i> Bus from Ouchy</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/c8.alamy.com/3b20c9ab0174c7a5a46c93123e7ac6c8ba457bdf.jpg" class="card-img" alt="Flon">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-city" style="color: var(--sbb-red);"></i> Flon District</h3>
+                    <p class="card-text">Former 19th-century warehouse quarter transformed into Lausanne's creative hub. Bowling at Bowl Bar, pop-up urban beach (summer), ice rink (winter), avant-garde theatre at Arsenic, and densest concentration of bars/clubs.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag red"><i class="fas fa-bowling-ball"></i> Bowling</span>
+                        <span class="tag blue"><i class="fas fa-theater-masks"></i> Arsenic Theatre</span>
+                        <span class="tag"><i class="fas fa-glass-cheers"></i> Nightlife</span>
+                        <span class="tag green"><i class="fas fa-shopping-bag"></i> Boutiques</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.twosmallpotatoes.com/7ca7704a2c622185ab2c63de4705f7940e14594f.jpg" class="card-img" alt="Ouchy">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-water" style="color: var(--lake-blue);"></i> Ouchy Lakefront</h3>
+                    <p class="card-text">Belle Époque promenade with the Olympic Museum gardens, the iconic <strong>Olympic flame</strong> monument, and views across Lake Geneva to the French Alps. Free stroll, perfect for Monday evening.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag"><i class="fas fa-landmark"></i> Olympic Museum</span>
+                        <span class="tag blue"><i class="fas fa-walking"></i> Promenade</span>
+                        <span class="tag green"><i class="fas fa-tree"></i> Gardens</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-store" style="color: var(--vine-green);"></i> Cully Village</h3>
+                    <p class="card-text">Quaint Lavaux wine village directly on the lake. Walkable from the train station. Stone houses, waterfront restaurants, and immediate access to the UNESCO vineyard hiking trails. Less touristy than Lutry.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag"><i class="fas fa-train"></i> 12 min from Lausanne</span>
+                        <span class="tag gold"><i class="fas fa-wine-glass"></i> Wine Bars</span>
+                        <span class="tag green"><i class="fas fa-home"></i> Village Charm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EHL AMENITIES TAB -->
+    <div id="ehl" class="tab-content">
+        <div class="alert">
+            <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
+            <div>
+                <strong>Campus Practical Info</strong>
+                <p>Campus is <strong>cashless</strong> — all credit cards including Amex accepted. Reception: Mon–Fri 08:00–19:00, Sat 08:00–18:00, <strong>Sun Closed</strong>. Breakfast, lunch & dinner normally served on campus Mon–Fri.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.ehl.edu/d76a390a757b3b35bbe2f58139a9b431bdf2b09a.jpg" class="card-img" alt="EHL Campus">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-building" style="color: var(--sbb-red);"></i> Campus Overview</h3>
+                    <p class="card-text">Self-contained hospitality village on the heights of Lausanne. Modern architecture set in green parkland with views toward the lake. Business guests have access to world-class student-operated facilities.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/gs.ehl.edu/e5468512ac10e709b73f7446a28d0ea23a4ac4cf.png" class="card-img" alt="EHL Building">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-utensils" style="color: var(--sbb-red);"></i> On-Campus Dining</h3>
+                    <p class="card-text"><strong>Berceau des Sens</strong> (Michelin-starred, student-run) and <strong>1893</strong> (French brasserie) serve Mon–Fri. Breakfast, lunch, and dinner are normally available for campus guests. Sunday = closed.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="tag red"><i class="fas fa-award"></i> Michelin Star</span>
+                        <span class="tag"><i class="fas fa-calendar"></i> Mon–Fri</span>
+                        <span class="tag closed" style="background: rgba(235,0,0,0.08); color: var(--sbb-red);"><i class="fas fa-times-circle"></i> Sun Closed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-dumbbell" style="color: var(--lake-blue);"></i> Sports & Wellness</h2>
+        <div class="grid grid-3">
+            <div class="feature-card" style="border-left-color: var(--lake-blue);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--lake-blue), #4a90e2);"><i class="fas fa-dumbbell"></i></div>
+                <h3>Fitness Center</h3>
+                <p class="card-text">400m² facility with 22 cardio machines, weight lifting zone, functional cage, and free weights.</p>
+            </div>
+            <div class="feature-card" style="border-left-color: var(--lake-blue);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--lake-blue), #4a90e2);"><i class="fas fa-swimmer"></i></div>
+                <h3>Indoor Pool</h3>
+                <p class="card-text">25m pool (4 lanes), aqua fitness classes, and water polo training sessions.</p>
+            </div>
+            <div class="feature-card" style="border-left-color: var(--lake-blue);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--lake-blue), #4a90e2);"><i class="fas fa-spa"></i></div>
+                <h3>Recovery Zone</h3>
+                <p class="card-text">Sauna, cold bath, and rest area with outdoor views for post-workout recovery.</p>
+            </div>
+            <div class="feature-card" style="border-left-color: var(--vine-green);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--vine-green), #6ab04c);"><i class="fas fa-baseball-ball"></i></div>
+                <h3>Courts & Pitches</h3>
+                <p class="card-text">2 tennis courts, 2 padel courts, beach volleyball court, and a multisport pitch.</p>
+            </div>
+            <div class="feature-card" style="border-left-color: var(--vine-green);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--vine-green), #6ab04c);"><i class="fas fa-basketball-ball"></i></div>
+                <h3>Gymnasium</h3>
+                <p class="card-text">1,300m² double hall for basketball, volleyball, badminton, and futsal.</p>
+            </div>
+            <div class="feature-card" style="border-left-color: var(--vine-green);">
+                <div class="feature-icon" style="background: linear-gradient(135deg, var(--vine-green), #6ab04c);"><i class="fas fa-running"></i></div>
+                <h3>Running & Trails</h3>
+                <p class="card-text">2km campus running track + direct access to Bois du Jorat forest for hiking and mountain biking.</p>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem; font-size: 1.5rem;"><i class="fas fa-bus" style="color: var(--sbb-red);"></i> Getting to Campus</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Route</th>
+                        <th>Duration</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Geneva Airport</strong></td>
+                        <td>Train → Lausanne Gare → M2 → Bus</td>
+                        <td>~70 min total</td>
+                        <td>Direct IC train to Lausanne (53 min) + M2 to Croisettes (15 min) + bus (5 min)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lausanne Gare</strong></td>
+                        <td>Metro M2 to Croisettes</td>
+                        <td>15 min</td>
+                        <td>Automated metro, direction Croisettes. Runs every 5–8 min.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Croisettes</strong></td>
+                        <td>Bus 64 / 45 / PostBus</td>
+                        <td>5–10 min</td>
+                        <td>South Gate: Bus 64 to Vert-bois/EHL. North Gate: Bus 45 to Cojonnex/EHL.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lausanne Center</strong></td>
+                        <td>Taxi / Uber</td>
+                        <td>15–20 min</td>
+                        <td>Uber operates in Lausanne. Taxis available at Gare and Flon.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Image Modal -->
+<div class="modal" id="imgModal" onclick="closeModal()">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <img id="modalImg" src="" alt="Preview">
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.closest('.nav-tab').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openModal(src) {
+        document.getElementById('modalImg').src = src;
+        document.getElementById('imgModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('imgModal').classList.remove('active');
+    }
+
+    // Keyboard nav
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+
+</body>
+</html>
